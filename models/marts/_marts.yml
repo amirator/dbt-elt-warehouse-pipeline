@@ -1,0 +1,66 @@
+version: 2
+models:
+  - name: fct_landings
+    description: "Incremental fact: commercial landings by year x state x species x data source. Units: live-weight pounds; nominal ex-vessel USD."
+    columns:
+      - name: landing_key
+        data_tests: [unique, not_null]
+      - name: species_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_species'), field: species_key}
+      - name: state_name
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_state'), field: state_name}
+      - name: region_name
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["New England", "Middle Atlantic", "South Atlantic", "Gulf", "Pacific Coast", "Alaska", "Hawaii", "Great Lakes", "Unknown"]
+  - name: dim_species
+    columns:
+      - name: species_key
+        data_tests: [unique, not_null]
+      - name: species_group
+        data_tests: [not_null]
+  - name: dim_state
+    columns:
+      - name: state_name
+        data_tests: [unique, not_null]
+  - name: mart_landings_by_region_year
+    description: Yearly totals by NOAA region.
+    data_tests:
+      - dbt_utils_free_unique_combo:
+          arguments: {columns: ["landing_year", "region_name"]}
+    columns:
+      - name: exvessel_usd
+        data_tests: [non_negative]
+      - name: landed_lbs
+        data_tests: [non_negative]
+  - name: mart_species_group_trends
+    description: Yearly value and volume by species group with share, YoY change and 5-year rolling average.
+    data_tests:
+      - dbt_utils_free_unique_combo:
+          arguments: {columns: ["landing_year", "species_group"]}
+    columns:
+      - name: exvessel_usd
+        data_tests: [non_negative]
+      - name: share_of_year_usd
+        data_tests:
+          - value_between: {arguments: {min_value: 0, max_value: 1}}
+  - name: mart_new_england_watch
+    description: New England landings for the watch species groups (lobster, scallops, herring, groundfish, salmon, shellfish).
+    columns:
+      - name: watch_key
+        data_tests: [unique, not_null]
+  - name: mart_pipeline_load_audit
+    description: Latest ingestion status per year partition - feeds pipeline monitoring.
+    columns:
+      - name: landing_year
+        data_tests: [unique, not_null]
+      - name: last_action
+        data_tests:
+          - accepted_values:
+              arguments: {values: ["inserted", "replaced", "unchanged"]}

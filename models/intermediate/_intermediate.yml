@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: int_landings__aggregated
+    description: One row per year x state x species x data source; sub-records summed.
+    columns:
+      - name: landing_key
+        data_tests: [unique, not_null]
+  - name: int_species__classified
+    description: Distinct species with a business species group from the species_group_map seed.
+    columns:
+      - name: species_key
+        data_tests: [unique, not_null]

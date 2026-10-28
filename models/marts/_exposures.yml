@@ -1,0 +1,23 @@
+version: 2
+exposures:
+  - name: landings_charts_report
+    label: Seafood landings charts and HTML report
+    type: analysis
+    maturity: medium
+    url: https://github.com/amirator/dbt-elt-warehouse-pipeline/tree/main/reports
+    description: PNG charts and reports/report.html built by scripts/make_report.py from the marts.
+    depends_on:
+      - ref('mart_species_group_trends')
+      - ref('mart_landings_by_region_year')
+      - ref('mart_new_england_watch')
+    owner:
+      name: Amir Khan
+  - name: pipeline_monitoring
+    label: Ingestion monitoring view
+    type: dashboard
+    maturity: low
+    description: Latest load status per partition, intended for a monitoring tile or alert.
+    depends_on:
+      - ref('mart_pipeline_load_audit')
+    owner:
+      name: Amir Khan

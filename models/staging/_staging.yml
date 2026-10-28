@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: stg_noaa__landings
+    description: Typed, renamed FOSS records. Species names cleaned of the '**' grouped-record marker.
+    columns:
+      - name: source_row_id
+        description: Oracle ROWID taken from the API self link (lineage back to the publisher row).
+        data_tests: [unique, not_null]
+      - name: landing_year
+        data_tests:
+          - not_null
+          - value_between: {arguments: {min_value: 1950, max_value: 2100}}
+      - name: state_name
+        data_tests: [not_null]
+      - name: landed_lbs
+        description: Live-weight pounds. 14 ACCSP records (2007-2022) are small negative adjustments; kept and pinned by assert_negative_adjustments_pinned.
+      - name: exvessel_usd
+        description: Nominal ex-vessel US dollars (not inflation-adjusted).
+  - name: stg_noaa__load_log
+    description: Ingestion audit log, one row per partition attempt.
+    columns:
+      - name: run_id
+        data_tests: [not_null]

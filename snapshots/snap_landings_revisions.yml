@@ -1,0 +1,15 @@
+snapshots:
+  - name: snap_landings_revisions
+    description: >
+      SCD Type 2 history of published landings. NOAA revises recent years; when the
+      loader replaces a partition with changed figures, the snapshot closes the old
+      row (dbt_valid_to) and opens a new version.
+    relation: ref('int_landings__aggregated')
+    config:
+      unique_key: landing_key
+      strategy: check
+      check_cols: [landed_lbs, exvessel_usd, source_record_count]
+      hard_deletes: invalidate
+    columns:
+      - name: landing_key
+        data_tests: [not_null]

@@ -1,0 +1,35 @@
+# Written for the repo; not yet run on GitHub (project verified locally).
+name: dbt-ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"   # weekly re-sync: picks up NOAA revisions via the look-back window
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DBT_PROFILES_DIR: ${{ github.workspace }}
+      DBT_DUCKDB_PATH: ${{ github.workspace }}/warehouse.duckdb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Ingestion unit tests
+        run: pytest -q
+      - name: Extract + load (last 5 years to keep CI fast)
+        run: python -m ingestion.extract_load --db "$DBT_DUCKDB_PATH" --start-year 2020 --end-year 2024
+      - name: Source freshness
+        run: dbt source freshness
+      - name: dbt build (DuckDB)
+        run: dbt build
+      - name: dbt docs generate
+        run: dbt docs generate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dbt-docs
+          path: target/

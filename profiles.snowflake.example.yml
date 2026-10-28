@@ -1,0 +1,18 @@
+# EXAMPLE ONLY - NOT RUN. This project was verified on DuckDB only.
+# To try on Snowflake: pip install dbt-snowflake, load raw.foss_landings and
+# raw._load_log into <DB>.RAW (e.g. with the same Python loader pointed at
+# Snowflake, or COPY INTO from the landed JSON), copy this block into
+# ~/.dbt/profiles.yml and run: dbt build --target snowflake
+seafood_elt:
+  target: snowflake
+  outputs:
+    snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      authenticator: externalbrowser        # or use private_key_path for key-pair auth
+      role: TRANSFORMER
+      warehouse: TRANSFORMING_WH
+      database: SEAFOOD_ANALYTICS
+      schema: DBT_DEV
+      threads: 8

@@ -1,0 +1,29 @@
+version: 2
+sources:
+  - name: noaa_foss
+    description: NOAA Fisheries One Stop Shop (FOSS) commercial landings, loaded by ingestion/extract_load.py.
+    schema: raw
+    loaded_at_field: _loaded_at
+    freshness:
+      warn_after: {count: 35, period: day}
+      error_after: {count: 120, period: day}
+    tables:
+      - name: foss_landings
+        description: One row per record returned by the FOSS landings API (collection = Commercial), partitioned by year.
+        columns:
+          - name: year
+            data_tests: [not_null]
+          - name: collection
+            data_tests:
+              - accepted_values:
+                  arguments: {values: ["Commercial"]}
+          - name: _partition_sha256
+            data_tests: [not_null]
+      - name: _load_log
+        loaded_at_field: finished_at
+        description: One row per partition sync attempt (inserted / replaced / unchanged / empty / failed).
+        columns:
+          - name: action
+            data_tests:
+              - accepted_values:
+                  arguments: {values: ["inserted", "replaced", "unchanged", "empty", "failed"]}

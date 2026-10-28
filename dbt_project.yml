@@ -1,0 +1,39 @@
+name: seafood_elt
+version: "1.0.0"
+config-version: 2
+profile: seafood_elt
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+analysis-paths: ["analysis"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages", "logs"]
+
+vars:
+  # NOAA revises recent years; the incremental fact re-processes this many trailing years
+  lookback_years: 2
+  # "Cooke-relevant" species groups (Atlantic seafood portfolio: salmon, shellfish, pelagics, groundfish)
+  watch_groups: ["Salmon", "Lobster", "Scallops", "Mussels", "Oysters", "Herring", "Groundfish"]
+
+seeds:
+  seafood_elt:
+    +schema: seeds
+
+models:
+  seafood_elt:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: table
+
+snapshots:
+  seafood_elt:
+    +target_schema: snapshots

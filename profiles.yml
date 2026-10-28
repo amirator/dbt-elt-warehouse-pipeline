@@ -1,0 +1,8 @@
+# Local profile. Run dbt with --profiles-dir . (run.sh does this).
+seafood_elt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', 'warehouse.duckdb') }}"
+      threads: 4

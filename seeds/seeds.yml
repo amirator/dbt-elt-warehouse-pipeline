@@ -1,0 +1,9 @@
+version: 2
+seeds:
+  - name: species_group_map
+    description: Hand-curated mapping from the first word of the NOAA AFS common name (before the comma) to a business species group.
+    columns:
+      - name: name_prefix
+        data_tests: [unique, not_null]
+      - name: species_group
+        data_tests: [not_null]
