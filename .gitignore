@@ -8,3 +8,4 @@ data/raw/
 __pycache__/
 .pytest_cache/
 dist/
+PROJECT_BLURB.md
